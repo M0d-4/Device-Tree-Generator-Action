@@ -47,31 +47,34 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
+    # Add this step to ensure a clean Linux Python environment
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10' 
+
     - name: Getting tools ready 
       run: |
+        sudo apt-get update
+        sudo apt-get install -y cpio python3-magic
         pip3 install twrpdtgen 
-        sudo apt-get install cpio
     
     - name: Downloading .img file
       run: |
-        wget ${{ github.event.inputs.DEVICE_IMG }}
+        # Use -O to force a specific filename for easier logic
+        wget ${{ github.event.inputs.DEVICE_IMG }} -O recovery.img
         if [ -f ./recovery.img ]; then
             echo "RECOVERY_TYPE=recovery" >> $GITHUB_ENV
             echo "recovery.img file found!"
-        elif [ -f ./boot.img ]; then
-            echo "RECOVERY_TYPE=boot" >> $GITHUB_ENV
-            echo "boot.img file found!"
-        elif [ -f ./vendor_boot.img ]; then
-            echo "RECOVERY_TYPE=vendor_boot" >> $GITHUB_ENV
-            echo "vendor_boot.img file found!"
         else
             echo "No Recovery file found!"
-            cd Exit
+            exit 1
         fi
         
     - name: Generating Device tree
       run: |
-        python3 -m twrpdtgen ./${{ env.RECOVERY_TYPE }}.img 
+        # Running as a module helps ensure the Linux path is respected
+        python3 -m twrpdtgen recovery.img
         
     - name: Set Build Date 
       run: |
