@@ -61,20 +61,19 @@ jobs:
     
     - name: Downloading .img file
       run: |
-        # Use -O to force a specific filename for easier logic
-        wget ${{ github.event.inputs.DEVICE_IMG }} -O recovery.img
+        # Use -L to follow redirects and -O to rename the output
+        curl -L "${{ github.event.inputs.DEVICE_IMG }}" -o recovery.img
         if [ -f ./recovery.img ]; then
             echo "RECOVERY_TYPE=recovery" >> $GITHUB_ENV
-            echo "recovery.img file found!"
         else
-            echo "No Recovery file found!"
+            echo "Failed to download image"
             exit 1
         fi
         
     - name: Generating Device tree
       run: |
-        # Running as a module helps ensure the Linux path is respected
-        python3 -m twrpdtgen recovery.img
+        # Use -p (product) and -m (manufacturer) to bypass the build.prop check
+        python3 -m twrpdtgen recovery.img --m samsung --p a23
         
     - name: Set Build Date 
       run: |
@@ -83,6 +82,7 @@ jobs:
     - name: getting device information 
       run: |
           mv ./output/ device
+          # This will now correctly navigate to device/samsung/a23
           cd device/*/
           echo "DEVICE_ID=${PWD##*/}" >> $GITHUB_ENV
           cd *
