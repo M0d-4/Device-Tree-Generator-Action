@@ -77,7 +77,7 @@ jobs:
       run: |
         # Check if boot.img exists, then run with Samsung A23 overrides
         if [ -f ./boot.img ]; then
-            python3 -m twrpdtgen boot.img -m samsung -p a23
+            python3 -m twrpdtgen boot.img --manufacturer samsung --product a23
         elif [ -f ./recovery.img ]; then
             python3 -m twrpdtgen recovery.img --m samsung --p a23
         else
