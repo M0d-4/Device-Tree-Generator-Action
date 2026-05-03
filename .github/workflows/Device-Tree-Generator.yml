@@ -62,7 +62,7 @@ jobs:
     - name: Downloading .img file
       run: |
         # Use -L to follow redirects and -O to rename the output
-        curl -L "${{ github.event.inputs.DEVICE_IMG }}" -o recovery.img
+        curl -L "${{ github.event.inputs.DEVICE_IMG }}" -o boot.img
         if [ -f ./recovery.img ]; then
             echo "RECOVERY_TYPE=recovery" >> $GITHUB_ENV
         else
@@ -72,8 +72,15 @@ jobs:
         
     - name: Generating Device tree
       run: |
-        # Use -p (product) and -m (manufacturer) to bypass the build.prop check
-        python3 -m twrpdtgen recovery.img --m samsung --p a23
+        # Check if boot.img exists, then run with Samsung A23 overrides
+        if [ -f ./boot.img ]; then
+            python3 -m twrpdtgen boot.img --m samsung --p a23
+        elif [ -f ./recovery.img ]; then
+            python3 -m twrpdtgen recovery.img --m samsung --p a23
+        else
+            echo "No image found to process!"
+            exit 1
+        fi
         
     - name: Set Build Date 
       run: |
