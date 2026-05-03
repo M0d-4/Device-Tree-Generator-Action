@@ -57,7 +57,8 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y cpio python3-magic
-        pip3 install twrpdtgen 
+        # Downgrade to v2.1.0 which supports -m and -p flags
+        pip3 install twrpdtgen==2.1.0
     
     - name: Downloading .img file
       run: |
