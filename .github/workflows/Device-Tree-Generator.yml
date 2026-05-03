@@ -76,9 +76,12 @@ jobs:
         
     - name: Generating Device tree
       run: |
-        # Check if boot.img exists, then run with Samsung A23 overrides
-        if [ -f ./boot.img ]; then
-            python3 -m twrpdtgen boot.img --manufacturer samsung --product a23
+        # Set environment variables to bypass the property detection logic
+        export TWRPDTGEN_MANUFACTURER="samsung"
+        export TWRPDTGEN_PRODUCT="a23"
+        
+        # Run the tool with ONLY the image path
+        python3 -m twrpdtgen boot.img
         elif [ -f ./recovery.img ]; then
             python3 -m twrpdtgen recovery.img --m samsung --p a23
         else
