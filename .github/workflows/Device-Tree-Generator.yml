@@ -75,11 +75,6 @@ jobs:
         
     - name: Generating Device tree
       run: |
-        # Force the manufacturer and product name to avoid the build.prop error
-        python3 -m twrpdtgen boot.img --m samsung --p a23
-        
-    - name: Generating Device tree
-      run: |
         # Check if boot.img exists, then run with Samsung A23 overrides
         if [ -f ./boot.img ]; then
             python3 -m twrpdtgen boot.img --m samsung --p a23
