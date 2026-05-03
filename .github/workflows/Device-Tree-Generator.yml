@@ -76,11 +76,16 @@ jobs:
         
     - name: Generating Device tree
       run: |
-        # Set environment variables to bypass the property detection logic
-        export TWRPDTGEN_MANUFACTURER="samsung"
-        export TWRPDTGEN_PRODUCT="a23"
+        # Create a dummy build.prop so the tool doesn't crash
+        echo "ro.product.system.brand=samsung" > build.prop
+        echo "ro.product.system.manufacturer=samsung" >> build.prop
+        echo "ro.product.system.model=Galaxy A23" >> build.prop
+        echo "ro.product.system.device=a23" >> build.prop
+        echo "ro.product.system.name=a23" >> build.prop
+        echo "ro.build.version.release=12" >> build.prop
+        echo "ro.build.version.sdk=31" >> build.prop
         
-        # Run the tool with ONLY the image path
+        # Run the tool. It should now find the build.prop in the current folder.
         python3 -m twrpdtgen boot.img
         elif [ -f ./recovery.img ]; then
             python3 -m twrpdtgen recovery.img --m samsung --p a23
