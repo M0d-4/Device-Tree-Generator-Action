@@ -61,14 +61,22 @@ jobs:
     
     - name: Downloading .img file
       run: |
-        # Use -L to follow redirects and -O to rename the output
+        # Use curl -L to follow redirects (important for cloud storage links)
         curl -L "${{ github.event.inputs.DEVICE_IMG }}" -o boot.img
-        if [ -f ./recovery.img ]; then
-            echo "RECOVERY_TYPE=recovery" >> $GITHUB_ENV
+        
+        # Verify if the file actually exists and isn't just an empty text file/error page
+        if [ -f ./boot.img ] && [ $(stat -c%s "./boot.img") -gt 1000000 ]; then
+            echo "BOOT_EXISTS=true" >> $GITHUB_ENV
+            echo "boot.img downloaded successfully!"
         else
-            echo "Failed to download image"
+            echo "Download failed or file is too small to be a boot image!"
             exit 1
         fi
+        
+    - name: Generating Device tree
+      run: |
+        # Force the manufacturer and product name to avoid the build.prop error
+        python3 -m twrpdtgen boot.img --m samsung --p a23
         
     - name: Generating Device tree
       run: |
